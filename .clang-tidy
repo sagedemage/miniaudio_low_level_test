@@ -1,0 +1,56 @@
+Checks:   '
+          bugprone-*,
+          cert-*,
+          cppcoreguidelines-*,
+          performance-*,
+          readability-*,
+          portability-*,
+          clang-analyzer-*,
+          llvm-*,
+          google-*,
+          portability-*,
+          misc-misleading-identifier,
+          misc-homoglyph,
+          misc-misleading-bidirectional,
+          -readability-implicit-bool-conversion,
+          -readability-magic-numbers,
+          -cppcoreguidelines-avoid-magic-numbers,
+          -cppcoreguidelines-pro-bounds-pointer-arithmetic
+          -cppcoreguidelines-pro-type-reinterpret-cast,
+          -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+          -readability-make-member-function-const,
+          -readability-identifier-length,
+          -llvm-header-guard,
+          -performance-avoid-endl,
+          -readability-function-cognitive-complexity,
+          -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+          -bugprone-branch-clone,
+          -readability-container-data-pointer,
+          -cppcoreguidelines-init-variables,
+          -bugprone-easily-swappable-parameters,
+          '
+# Trojan Source
+# The misc-misleading-identifier, misc-homoglyph, and misc-misleading-bidirectional are
+# checks for preventing the software vulnerability called Trojan Source.
+# Trojan Source are invisible source code vulnerabilities.
+
+WarningsAsErrors: true
+HeaderFilterRegex: '.*'
+FormatStyle: 'file'
+
+# Add the following check options to comply with some aspects of the Google C++ Style Guide
+CheckOptions:
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE

@@ -1,0 +1,13 @@
+---
+
+# Custom version of the Google C++ Style Guide
+
+---
+
+Language: Cpp
+BasedOnStyle: Google
+
+# Custom settings
+TabWidth: 4
+IndentWidth: 4
+UseCRLF: false
