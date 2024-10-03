@@ -1,4 +1,6 @@
+#define MA_NO_VORBIS
 #define MINIAUDIO_IMPLEMENTATION
+#include <miniaudio/extras/miniaudio_libvorbis.h>
 #include <miniaudio/miniaudio.h>
 
 #include <chrono>
@@ -20,9 +22,95 @@ void DataCallback(ma_device* p_device, void* p_output, const void* p_input,
     (void)p_input;
 }
 
+static ma_result MaDecodingBackendInitLibvorbis(
+    void* p_user_data, ma_read_proc on_read, ma_seek_proc on_seek,
+    ma_tell_proc on_tell, void* p_read_seek_tell_user_data,
+    const ma_decoding_backend_config* p_config,
+    const ma_allocation_callbacks* p_allocation_callbacks,
+    ma_data_source** pp_backend) {
+    ma_result result;
+    ma_libvorbis* p_vorbis;
+
+    (void)p_user_data;
+
+    p_vorbis = static_cast<ma_libvorbis*>(
+        ma_malloc(sizeof(*p_vorbis), p_allocation_callbacks));
+    if (p_vorbis == NULL) {
+        return MA_OUT_OF_MEMORY;
+    }
+
+    result =
+        ma_libvorbis_init(on_read, on_seek, on_tell, p_read_seek_tell_user_data,
+                          p_config, p_allocation_callbacks, p_vorbis);
+    if (result != MA_SUCCESS) {
+        ma_free(p_vorbis, p_allocation_callbacks);
+        return result;
+    }
+
+    *pp_backend = p_vorbis;
+
+    return MA_SUCCESS;
+}
+
+static ma_result MaDecodingBackendInitFileLibvorbis(
+    void* p_user_data, const char* p_file_path,
+    const ma_decoding_backend_config* p_config,
+    const ma_allocation_callbacks* p_allocation_callbacks,
+    ma_data_source** pp_backend) {
+    ma_result result;
+    ma_libvorbis* p_vorbis;
+
+    (void)p_user_data;
+
+    p_vorbis = static_cast<ma_libvorbis*>(
+        ma_malloc(sizeof(*p_vorbis), p_allocation_callbacks));
+    if (p_vorbis == NULL) {
+        return MA_OUT_OF_MEMORY;
+    }
+
+    result = ma_libvorbis_init_file(p_file_path, p_config,
+                                    p_allocation_callbacks, p_vorbis);
+    if (result != MA_SUCCESS) {
+        ma_free(p_vorbis, p_allocation_callbacks);
+        return result;
+    }
+
+    *pp_backend = p_vorbis;
+
+    return MA_SUCCESS;
+}
+
+static void MaDecodingBackendUninitLibvorbis(
+    void* p_user_data, ma_data_source* p_backend,
+    const ma_allocation_callbacks* p_allocation_callbacks) {
+    ma_libvorbis* p_vorbis = static_cast<ma_libvorbis*>(p_backend);
+
+    (void)p_user_data;
+
+    ma_libvorbis_uninit(p_vorbis, p_allocation_callbacks);
+    ma_free(p_vorbis, p_allocation_callbacks);
+}
+
 ma_bool32 PlaySound(const char* audio_file, ma_decoder* decoder,
                     ma_device* device) {
-    ma_result result = ma_decoder_init_file(audio_file, NULL, decoder);
+    static ma_decoding_backend_vtable g_ma_decoding_backend_vtable_libvorbis = {
+        MaDecodingBackendInitLibvorbis, MaDecodingBackendInitFileLibvorbis,
+        NULL, /* onInitFileW() */
+        NULL, /* onInitMemory() */
+        MaDecodingBackendUninitLibvorbis};
+
+    ma_decoding_backend_vtable* p_custom_backend_v_tables[] = {
+        &g_ma_decoding_backend_vtable_libvorbis};
+
+    ma_decoder_config decoder_config;
+    decoder_config = ma_decoder_config_init_default();
+    decoder_config.pCustomBackendUserData = NULL;
+    decoder_config.ppCustomBackendVTables = p_custom_backend_v_tables;
+    decoder_config.customBackendCount = sizeof(p_custom_backend_v_tables) /
+                                        sizeof(p_custom_backend_v_tables[0]);
+
+    ma_result result =
+        ma_decoder_init_file(audio_file, &decoder_config, decoder);
     if (result != MA_SUCCESS) {
         std::cerr << "Unable to initialize the decoder with an audio file!"
                   << std::endl;
@@ -56,13 +144,13 @@ ma_bool32 PlaySound(const char* audio_file, ma_decoder* decoder,
 }
 
 int main() {
-    const char* audio_file = "audio/test.mp3";
+    const char* audio_file = "audio/test.ogg";
     ma_decoder decoder;
     ma_device device;
 
     std::cout << "----------------------------------------------------"
               << std::endl;
-    std::cout << "| Play mp3 file with miniaudio via low level apis. |"
+    std::cout << "| Play ogg file with miniaudio via low level apis. |"
               << std::endl;
     std::cout << "----------------------------------------------------"
               << std::endl;
