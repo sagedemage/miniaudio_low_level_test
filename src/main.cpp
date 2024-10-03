@@ -1,7 +1,7 @@
 #define MA_NO_VORBIS
 #define MINIAUDIO_IMPLEMENTATION
-#include <miniaudio/extras/miniaudio_libvorbis.h>
 #include <miniaudio/miniaudio.h>
+#include <miniaudio/extras/miniaudio_libvorbis.h>
 
 #include <chrono>
 #include <iostream>
