@@ -29,6 +29,7 @@ Checks:   '
           -cppcoreguidelines-init-variables,
           -bugprone-easily-swappable-parameters,
           -cppcoreguidelines-avoid-c-arrays,
+          -llvm-include-order,
           '
 # Trojan Source
 # The misc-misleading-identifier, misc-homoglyph, and misc-misleading-bidirectional are
